@@ -13,5 +13,5 @@
 #SBATCH --error=./logs/expert_explore/%j_%x.err
 #SBATCH --export=ALL
 
-bash ./run_singularity_mpi.sh \
-	python3 proto_goal/test_asym_actor_critic.py
+bash ./run-mpi4py-singularity.bash \
+	python3 dagger_template.py

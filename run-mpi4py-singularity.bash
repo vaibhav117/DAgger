@@ -20,7 +20,10 @@ singularity exec $nv \
             /bin/bash -c "
 source /ext3/openmpi.sh
 if [ -f /ext3/env.sh ]; then source /ext3/env.sh; fi
+source ~/.bashrc
+export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/vm2134/.mujoco/mujoco200/bin
 conda activate hw1_dagger
+conda info
 eval $args
 #exit
 "

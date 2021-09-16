@@ -9,6 +9,7 @@ code in every TODO section, to implement DAgger. Attach the completed
 file in your submission.
 """
 
+from numpy.core.fromnumeric import argmax
 from numpy.lib.function_base import copy
 import tqdm
 import hydra
@@ -222,6 +223,7 @@ class Workspace:
                 'Train reward': train_reward,
                 'Eval reward': eval_reward
             })
+            wandb.log({"train_reward":train_reward, "eval_reward":eval_reward}, step= self.train_env.expert_calls)
 
 
 @hydra.main(config_path='.', config_name='train')
@@ -230,7 +232,7 @@ def main(cfg):
     # as the cfg object. To access any of the parameters in the file,
     # access them like cfg.param, for example the learning rate would
     # be cfg.lr
-    wandb.init(project="deep-rl-hw1", name=f"Dagger")
+    wandb.init(project="deep-rl-hw1", name=f"Dagger-{cfg.run_name}")
     workspace = Workspace(cfg)
     workspace.run()
 

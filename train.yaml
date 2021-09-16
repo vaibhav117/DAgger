@@ -1,4 +1,5 @@
 device: cuda
+run_name: expert_explore
 
 experience_buffer_len: 150000
 

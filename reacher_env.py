@@ -13,7 +13,7 @@ from hydra.utils import get_original_cwd, to_absolute_path
 
 
 class ReacherDaggerEnv(gym.Env):
-    def __init__(self, frame_height=224, frame_width=224, resize_visual=True):
+    def __init__(self, frame_height=120, frame_width=120, resize_visual=True):
         self._base_env = gym.make('ReacherPyBulletEnv-v0')
 
         self.expert_model = SAC.load(to_absolute_path('sac_reacher_expert_longer'), env=self._base_env)

@@ -37,9 +37,11 @@ class CNN(nn.Module):
         input_shape = ReacherDaggerEnv().observation_space.shape
         n_space = ReacherDaggerEnv().action_space.shape[0]
         self.conv = nn.Sequential(
-            nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4, padding=0),
+            nn.Conv2d(input_shape[0], 32, kernel_size=16, stride=4, padding=0),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=0),
+            nn.Conv2d(32, 64, kernel_size=8, stride=2, padding=0),
+            nn.ReLU(),
+            nn.Conv2d(16, 128, kernel_size=4, stride=2, padding=0),
             nn.ReLU(),
             nn.Flatten(),
         )
@@ -168,7 +170,7 @@ class Workspace:
 
     def alpha_decay_policy_selector(self,ep_num):
         random_num = random.randint(0,self.cfg.total_training_episodes)
-        take_expert_action = True if random_num > 2**ep_num else False
+        take_expert_action = True if random_num > ep_num else False
         return take_expert_action
 
     def run(self):

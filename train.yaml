@@ -1,5 +1,5 @@
 device: cuda
-run_name: linear_decay_high_res_lr=1e-5_batch=256
+run_name: exp_lr=1e-5_batch=256_norepeat
 
 experience_buffer_len: 150000
 
@@ -9,7 +9,7 @@ num_training_steps: 10000
 batch_size: 256
 lr: 1e-5
 decay_factor: 2
-decay_type: linear
+decay_type: exponential
 
 eval_every: 25
 num_eval_episodes: 3

@@ -4,7 +4,7 @@ run_name: dagger_explore_exponential_decay_high_res
 experience_buffer_len: 150000
 
 total_training_episodes: 2000
-train_every: 25
+train_every: 5
 num_training_steps: 10000
 batch_size: 256
 lr: 1e-4

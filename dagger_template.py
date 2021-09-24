@@ -166,7 +166,7 @@ class Workspace:
         return avg_loss
 
     def alpha_decay_policy_selector(self,ep_num):
-        random_num = random.randint(self.cfg.total_training_episodes)
+        random_num = random.randint(0,self.cfg.total_training_episodes)
         take_expert_action = True if random_num > ep_num else False
         return take_expert_action
 
@@ -202,7 +202,7 @@ class Workspace:
             obs = self.train_env.reset()
             done = False
             while not done:
-                
+
                 expert_action = self.train_env.get_expert_action()
                 if self.alpha_decay_policy_selector(ep_num):
                     policy_action = self.train_env.get_expert_action()

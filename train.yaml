@@ -1,5 +1,5 @@
 device: cuda
-run_name: linear_decay_high_res_lr=1e-4_batch=256
+run_name: linear_decay_high_res_lr=1e-5_batch=256
 
 experience_buffer_len: 150000
 

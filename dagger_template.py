@@ -10,7 +10,7 @@ file in your submission.
 """
 
 from numpy.core.fromnumeric import argmax, take
-from numpy.lib.function_base import copy
+from numpy.lib.function_base import copy, diff
 import tqdm
 import hydra
 import os
@@ -88,6 +88,7 @@ class Workspace:
         self.device = torch.device(cfg.device)
         self.train_env = ReacherDaggerEnv()
         self.eval_env = ReacherDaggerEnv()
+        self.state_obs_set = set()
 
         self.expert_buffer = ExpertBuffer(cfg.experience_buffer_len, 
                                           self.train_env.observation_space.shape,
@@ -178,6 +179,12 @@ class Workspace:
 
         return take_expert_action
 
+    def check_uniq(self,state_obs):
+        if state_obs in self.state_obs_set:
+            return False
+        else:
+            self.state_obs_set.add(state_obs)
+
     def run(self):
         train_loss, eval_reward, episode_length = 1., 0, 0
         iterable = tqdm.trange(self.cfg.total_training_episodes)
@@ -208,20 +215,22 @@ class Workspace:
             # 5. Use the self.transforms to make sure the image observation is of the right size.
             
             # TODO training loop here.
-            obs = self.train_env.reset()
+            obs , state_obs = self.train_env.reset()
             done = False
             while not done:
+                if self.check_uniq(state_obs):
+                    expert_action = self.train_env.get_expert_action()
+                    self.expert_buffer.insert(np.array(obs, copy=False),np.array(expert_action,copy=False))
 
-                expert_action = self.train_env.get_expert_action()
                 if self.alpha_decay_policy_selector(ep_num):
                     policy_action = self.train_env.get_expert_action()
                 else:
                     policy_action = self.model( self.transforms(torch.from_numpy(obs).float().to(self.device).unsqueeze(0)) )
                     policy_action = policy_action.squeeze().detach().cpu().numpy()
                 
-                self.expert_buffer.insert(np.array(obs, copy=False),np.array(expert_action,copy=False))
+                
 
-                obs, reward, done, info = self.train_env.step(policy_action)
+                obs, state_obs, reward, done, info = self.train_env.step(policy_action)
                 ep_train_reward += reward
                 ep_length += ep_length
 

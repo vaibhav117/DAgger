@@ -40,7 +40,7 @@ class ReacherDaggerEnv(gym.Env):
         visual_obs = self._base_env.render(mode='rgb_array')
         if self._resize_visual:
             visual_obs = self._resize_image_obs(visual_obs)
-        return visual_obs
+        return visual_obs , self.prop_states
 
     def step(self, action):
         prop_obs, reward, done, info = self._base_env.step(action)
@@ -48,7 +48,7 @@ class ReacherDaggerEnv(gym.Env):
         visual_obs = self._base_env.render(mode='rgb_array')
         if self._resize_visual:
             visual_obs = self._resize_image_obs(visual_obs)
-        return visual_obs, reward, done, info
+        return visual_obs, self.prop_states, reward, done, info
 
     def get_expert_action(self):
         self.expert_calls += 1

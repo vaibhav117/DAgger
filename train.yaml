@@ -1,5 +1,5 @@
 device: cuda
-run_name: exponential_decay_high_res_lr=1e-4_batch=256
+run_name: linear_decay_high_res_lr=1e-4_batch=256
 
 experience_buffer_len: 150000
 
@@ -9,7 +9,7 @@ num_training_steps: 10000
 batch_size: 256
 lr: 1e-4
 decay_factor: 2
-decay_type: exponential
+decay_type: linear
 
 eval_every: 25
 num_eval_episodes: 3

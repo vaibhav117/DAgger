@@ -52,7 +52,7 @@ class CNN(nn.Module):
             nn.ReLU(),
             nn.Linear(512, 256),
             nn.ReLU(),
-            nn.Linear(265, n_space),
+            nn.Linear(256, n_space),
             nn.Tanh()
         )
 

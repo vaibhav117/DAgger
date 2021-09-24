@@ -9,12 +9,13 @@ code in every TODO section, to implement DAgger. Attach the completed
 file in your submission.
 """
 
-from numpy.core.fromnumeric import argmax
+from numpy.core.fromnumeric import argmax, take
 from numpy.lib.function_base import copy
 import tqdm
 import hydra
 import os
 import wandb
+import random
 
 import torch
 import torch.nn as nn
@@ -164,6 +165,10 @@ class Workspace:
         avg_loss /= self.cfg.num_training_steps
         return avg_loss
 
+    def alpha_decay_policy_selector(self,ep_num):
+        random_num = random.randint(self.cfg.total_training_episodes)
+        take_expert_action = True if random_num > ep_num else False
+        return take_expert_action
 
     def run(self):
         train_loss, eval_reward, episode_length = 1., 0, 0
@@ -194,12 +199,20 @@ class Workspace:
             # 5. Use the self.transforms to make sure the image observation is of the right size.
             
             # TODO training loop here.
-            self.train_env.reset()
+            obs = self.train_env.reset()
             done = False
             while not done:
-                action = self.train_env.get_expert_action()
-                obs, reward, done, info = self.train_env.step(action)
-                self.expert_buffer.insert(np.array(obs, copy=False),np.array(action,copy=False))
+                
+                expert_action = self.train_env.get_expert_action()
+                if self.alpha_decay_policy_selector(ep_num):
+                    policy_action = self.train_env.get_expert_action()
+                else:
+                    policy_action = self.model( self.transforms(torch.from_numpy(obs).float().to(self.device).unsqueeze(0)) )
+                
+                self.expert_buffer.insert(np.array(obs, copy=False),np.array(expert_action,copy=False))
+                wandb.log({"replay_buffer_len":self.expert_buffer.__len__()})
+
+                obs, reward, done, info = self.train_env.step(policy_action)
                 ep_train_reward += reward
                 ep_length += ep_length
 

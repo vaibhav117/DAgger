@@ -1,5 +1,5 @@
 device: cuda
-run_name: expert_explore
+run_name: dagger_explore
 
 experience_buffer_len: 150000
 

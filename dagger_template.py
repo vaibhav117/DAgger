@@ -151,7 +151,7 @@ class Workspace:
         for _ in range(self.cfg.num_training_steps):
             # TODO write the training code.
             # Hint: use the self.transforms to make sure the image observation is of the right size.
-            batch_obs, batch_action = self.expert_buffer.sample()
+            batch_obs, batch_action = self.expert_buffer.sample(batch_size=self.cfg.batch_size)
 
             t_batch_obs = torch.from_numpy(batch_obs).float().to(self.device)
             t_batch_obs = self.transforms(t_batch_obs)

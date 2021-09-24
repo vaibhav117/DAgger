@@ -218,7 +218,7 @@ class Workspace:
             obs , state_obs = self.train_env.reset()
             done = False
             while not done:
-                if self.check_uniq(state_obs):
+                if self.check_uniq(state_obs.flat):
                     expert_action = self.train_env.get_expert_action()
                     self.expert_buffer.insert(np.array(obs, copy=False),np.array(expert_action,copy=False))
 

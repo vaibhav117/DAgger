@@ -208,7 +208,7 @@ class Workspace:
                     policy_action = self.train_env.get_expert_action()
                 else:
                     policy_action = self.model( self.transforms(torch.from_numpy(obs).float().to(self.device).unsqueeze(0)) )
-                    policy_action = policy_action.cpu().numpy()
+                    policy_action = policy_action.detach().numpy()
                 
                 self.expert_buffer.insert(np.array(obs, copy=False),np.array(expert_action,copy=False))
                 wandb.log({"replay_buffer_len":self.expert_buffer.__len__()})

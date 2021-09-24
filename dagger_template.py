@@ -163,6 +163,7 @@ class Workspace:
             self.optimizer.step()
 
         avg_loss /= self.cfg.num_training_steps
+        wandb.log({"avg_loss":avg_loss})
         return avg_loss
 
     def alpha_decay_policy_selector(self,ep_num):

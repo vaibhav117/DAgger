@@ -175,7 +175,7 @@ class Workspace:
             take_expert_action = True if random_num > self.cfg.decay_factor*ep_num else False
         else:
             take_expert_action = True if random_num > self.cfg.decay_factor**ep_num else False
-            
+
         return take_expert_action
 
     def run(self):
@@ -249,7 +249,6 @@ class Workspace:
             if eval_reward > best_eval_reward:
                 best_eval_reward = eval_reward
                 wandb.log({"best_eval_reward":best_eval_reward, "expert_calls": self.train_env.expert_calls})
-                torch.save(self.model,f"./experiments/{self.cfg.run_name}/best_model")
 
 
 @hydra.main(config_path='.', config_name='train')

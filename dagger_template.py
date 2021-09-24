@@ -50,7 +50,9 @@ class CNN(nn.Module):
         self.fc = nn.Sequential(
             nn.Linear(conv_out_size, 512),
             nn.ReLU(),
-            nn.Linear(512, n_space),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Linear(265, n_space),
             nn.Tanh()
         )
 
@@ -97,10 +99,10 @@ class Workspace:
         self.loss_function = F.mse_loss
 
         self.transforms = T.Compose([
-            T.RandomResizedCrop(size=(224, 224)),
+            T.RandomResizedCrop(size=(120, 120)),
         ])
         self.eval_transforms = T.Compose([
-            T.Resize(size=(224, 224))
+            T.Resize(size=(120, 120))
         ])
 
     def eval(self):

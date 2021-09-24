@@ -95,10 +95,10 @@ class Workspace:
         self.loss_function = F.mse_loss
 
         self.transforms = T.Compose([
-            T.RandomResizedCrop(size=(60, 80), scale=(0.95, 1.0)),
+            T.RandomResizedCrop(size=(224, 224)),
         ])
         self.eval_transforms = T.Compose([
-            T.Resize(size=(60, 80))
+            T.Resize(size=(224, 224))
         ])
 
     def eval(self):

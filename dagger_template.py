@@ -167,7 +167,7 @@ class Workspace:
 
     def alpha_decay_policy_selector(self,ep_num):
         random_num = random.randint(0,self.cfg.total_training_episodes)
-        take_expert_action = True if random_num > ep_num else False
+        take_expert_action = True if random_num > 2**ep_num else False
         return take_expert_action
 
     def run(self):

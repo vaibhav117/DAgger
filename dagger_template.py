@@ -237,8 +237,7 @@ class Workspace:
                 'Train reward': train_reward,
                 'Eval reward': eval_reward
             })
-            wandb.log({"train_reward_vs_episodes":train_reward, "eval_reward_vs_episodes":eval_reward})
-            wandb.log({"train_reward_vs_expert_calls":train_reward, "eval_reward_vs_expert_calls":eval_reward}, step= self.train_env.expert_calls)
+            wandb.log({"train_reward":train_reward, "eval_reward":eval_reward, "expert_calls": self.train_env.expert_calls})
 
 
 @hydra.main(config_path='.', config_name='train')

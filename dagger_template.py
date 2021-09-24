@@ -167,7 +167,6 @@ class Workspace:
             self.optimizer.step()
 
         avg_loss /= self.cfg.num_training_steps
-        wandb.log({"avg_loss":avg_loss})
         return avg_loss
 
     def alpha_decay_policy_selector(self,ep_num):
@@ -178,6 +177,7 @@ class Workspace:
     def run(self):
         train_loss, eval_reward, episode_length = 1., 0, 0
         iterable = tqdm.trange(self.cfg.total_training_episodes)
+        best_eval_reward = -30
         for ep_num in iterable:
             iterable.set_description('Collecting exp')
             # Set the DAGGER model to evaluation
@@ -216,7 +216,6 @@ class Workspace:
                     policy_action = policy_action.squeeze().detach().cpu().numpy()
                 
                 self.expert_buffer.insert(np.array(obs, copy=False),np.array(expert_action,copy=False))
-                wandb.log({"replay_buffer_len":self.expert_buffer.__len__()})
 
                 obs, reward, done, info = self.train_env.step(policy_action)
                 ep_train_reward += reward
@@ -242,7 +241,11 @@ class Workspace:
                 'Train reward': train_reward,
                 'Eval reward': eval_reward
             })
-            wandb.log({"train_reward":train_reward, "eval_reward":eval_reward, "expert_calls": self.train_env.expert_calls})
+
+            if eval_reward > best_eval_reward:
+                best_eval_reward = eval_reward
+                wandb.log({"best_eval_reward":best_eval_reward, "expert_calls": self.train_env.expert_calls})
+                torch.save(f"experiments/{self.cfg.run_name}/best_model")
 
 
 @hydra.main(config_path='.', config_name='train')
@@ -251,7 +254,7 @@ def main(cfg):
     # as the cfg object. To access any of the parameters in the file,
     # access them like cfg.param, for example the learning rate would
     # be cfg.lr
-    wandb.init(project="deep-rl-hw1", name=f"Dagger-{cfg.run_name}")
+    wandb.init(project="deep-rl-hw1-final", name=f"Dagger-{cfg.run_name}")
     workspace = Workspace(cfg)
     workspace.run()
 

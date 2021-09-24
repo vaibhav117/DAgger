@@ -212,7 +212,7 @@ class Workspace:
                 self.expert_buffer.insert(np.array(obs, copy=False),np.array(expert_action,copy=False))
                 wandb.log({"replay_buffer_len":self.expert_buffer.__len__()})
 
-                obs, reward, done, info = self.train_env.step(policy_action.cpu())
+                obs, reward, done, info = self.train_env.step(policy_action)
                 ep_train_reward += reward
                 ep_length += ep_length
 

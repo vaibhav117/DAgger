@@ -1,4 +1,4 @@
-device: cpu
+device: gpu
 run_name: dagger_explore_linear_decay
 
 experience_buffer_len: 150000

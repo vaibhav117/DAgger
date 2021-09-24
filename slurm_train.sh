@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --time=05:00:00
 #SBATCH --mem=100GB
-#SBATCH --job-name=hw1_dagger_explore_linear_decay_highres
+#SBATCH --job-name=exp_highres
 #SBATCH --mail-type=END
 #SBATCH --gres=gpu
 #SBATCH --array=1

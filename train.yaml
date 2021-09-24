@@ -1,5 +1,5 @@
 device: cuda
-run_name: dagger_explore_exponential_decay_high_res
+run_name: exponential_decay_high_res_hightraineval
 
 experience_buffer_len: 150000
 

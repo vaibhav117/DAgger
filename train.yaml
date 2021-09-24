@@ -1,12 +1,12 @@
 device: cuda
-run_name: linear_decay_high_res_lr=1e-3_batch=512
+run_name: linear_decay_high_res_lr=1e-3_batch=1024
 
 experience_buffer_len: 150000
 
 total_training_episodes: 2000
 train_every: 25
 num_training_steps: 10000
-batch_size: 512
+batch_size: 1024
 lr: 1e-3
 exponential_decay_factor: 2
 

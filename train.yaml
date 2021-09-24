@@ -10,5 +10,5 @@ batch_size: 256
 lr: 1e-4
 exponential_decay_factor: 2
 
-eval_every: 10
+eval_every: 5
 num_eval_episodes: 3

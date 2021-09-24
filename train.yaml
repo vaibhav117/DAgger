@@ -1,5 +1,5 @@
 device: cuda
-run_name: exp_lr=1e-5_batch=256_norepeat
+run_name: exp_norepeat_lr=1e-5_batch=256
 
 experience_buffer_len: 150000
 

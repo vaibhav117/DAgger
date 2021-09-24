@@ -5,12 +5,12 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --time=05:00:00
 #SBATCH --mem=100GB
-#SBATCH --job-name=lin_highres
+#SBATCH --job-name=exp_norepeat
 #SBATCH --mail-type=END
 #SBATCH --gres=gpu
 #SBATCH --array=1
-#SBATCH --output=./logs/dagger_explore_linear_decay_highres/%j_%x.out
-#SBATCH --error=./logs/dagger_explore_linear_decay_highres/%j_%x.err
+#SBATCH --output=./logs/dagger_exp_norepeat/%j_%x.out
+#SBATCH --error=./logs/dagger_exp_norepeat/%j_%x.err
 #SBATCH --export=ALL
 
 bash ./run-mpi4py-singularity.bash \

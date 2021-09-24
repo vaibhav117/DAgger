@@ -245,7 +245,7 @@ class Workspace:
             if eval_reward > best_eval_reward:
                 best_eval_reward = eval_reward
                 wandb.log({"best_eval_reward":best_eval_reward, "expert_calls": self.train_env.expert_calls})
-                torch.save(f"experiments/{self.cfg.run_name}/best_model")
+                torch.save(self.model,f"./experiments/{self.cfg.run_name}/best_model")
 
 
 @hydra.main(config_path='.', config_name='train')

@@ -88,7 +88,7 @@ class Workspace:
         self.device = torch.device(cfg.device)
         self.train_env = ReacherDaggerEnv()
         self.eval_env = ReacherDaggerEnv()
-        self.state_obs_set = {}
+        self.state_obs_set = []
 
         self.expert_buffer = ExpertBuffer(cfg.experience_buffer_len, 
                                           self.train_env.observation_space.shape,
@@ -180,11 +180,11 @@ class Workspace:
         return take_expert_action
 
     def check_uniq(self,state_obs):
-        if self.state_obs_set.has_key(state_obs):
-            return False
-        else:
-            self.state_obs_set[state_obs] = 1
-            return True
+        for state in self.state_obs_set:
+            if state == state_obs:
+                return False
+        self.state_obs_set.append(state_obs)
+        return True
 
     def run(self):
         train_loss, eval_reward, episode_length = 1., 0, 0

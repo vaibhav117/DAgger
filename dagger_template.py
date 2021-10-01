@@ -9,12 +9,13 @@ code in every TODO section, to implement DAgger. Attach the completed
 file in your submission.
 """
 
-from numpy.core.fromnumeric import argmax
-from numpy.lib.function_base import copy
+from numpy.core.fromnumeric import argmax, take
+from numpy.lib.function_base import copy, diff
 import tqdm
 import hydra
 import os
 import wandb
+import random
 
 import torch
 import torch.nn as nn
@@ -36,9 +37,11 @@ class CNN(nn.Module):
         input_shape = ReacherDaggerEnv().observation_space.shape
         n_space = ReacherDaggerEnv().action_space.shape[0]
         self.conv = nn.Sequential(
-            nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4, padding=0),
+            nn.Conv2d(input_shape[0], 32, kernel_size=16, stride=4, padding=0),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=0),
+            nn.Conv2d(32, 64, kernel_size=8, stride=2, padding=0),
+            nn.ReLU(),
+            nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=0),
             nn.ReLU(),
             nn.Flatten(),
         )
@@ -47,7 +50,9 @@ class CNN(nn.Module):
         self.fc = nn.Sequential(
             nn.Linear(conv_out_size, 512),
             nn.ReLU(),
-            nn.Linear(512, n_space),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Linear(256, n_space),
             nn.Tanh()
         )
 
@@ -83,6 +88,7 @@ class Workspace:
         self.device = torch.device(cfg.device)
         self.train_env = ReacherDaggerEnv()
         self.eval_env = ReacherDaggerEnv()
+        self.state_obs_set = []
 
         self.expert_buffer = ExpertBuffer(cfg.experience_buffer_len, 
                                           self.train_env.observation_space.shape,
@@ -94,10 +100,10 @@ class Workspace:
         self.loss_function = F.mse_loss
 
         self.transforms = T.Compose([
-            T.RandomResizedCrop(size=(60, 80), scale=(0.95, 1.0)),
+            T.RandomResizedCrop(size=(120, 120)),
         ])
         self.eval_transforms = T.Compose([
-            T.Resize(size=(60, 80))
+            T.Resize(size=(120, 120))
         ])
 
     def eval(self):
@@ -146,7 +152,7 @@ class Workspace:
         for _ in range(self.cfg.num_training_steps):
             # TODO write the training code.
             # Hint: use the self.transforms to make sure the image observation is of the right size.
-            batch_obs, batch_action = self.expert_buffer.sample()
+            batch_obs, batch_action = self.expert_buffer.sample(batch_size=self.cfg.batch_size)
 
             t_batch_obs = torch.from_numpy(batch_obs).float().to(self.device)
             t_batch_obs = self.transforms(t_batch_obs)
@@ -164,10 +170,26 @@ class Workspace:
         avg_loss /= self.cfg.num_training_steps
         return avg_loss
 
+    def alpha_decay_policy_selector(self,ep_num):
+        random_num = random.randint(0,self.cfg.total_training_episodes)
+        if self.cfg.decay_type == "linear":
+            take_expert_action = True if random_num > self.cfg.decay_factor*ep_num else False
+        else:
+            take_expert_action = True if random_num > self.cfg.decay_factor**ep_num else False
+
+        return take_expert_action
+
+    def check_uniq(self,state_obs):
+        for state in self.state_obs_set:
+            if state == state_obs:
+                return False
+        self.state_obs_set.append(state_obs)
+        return True
 
     def run(self):
         train_loss, eval_reward, episode_length = 1., 0, 0
         iterable = tqdm.trange(self.cfg.total_training_episodes)
+        best_eval_reward = -30
         for ep_num in iterable:
             iterable.set_description('Collecting exp')
             # Set the DAGGER model to evaluation
@@ -194,12 +216,22 @@ class Workspace:
             # 5. Use the self.transforms to make sure the image observation is of the right size.
             
             # TODO training loop here.
-            self.train_env.reset()
+            obs , state_obs = self.train_env.reset()
             done = False
             while not done:
-                action = self.train_env.get_expert_action()
-                obs, reward, done, info = self.train_env.step(action)
-                self.expert_buffer.insert(np.array(obs, copy=False),np.array(action,copy=False))
+                if self.check_uniq(state_obs.tobytes()):
+                    expert_action = self.train_env.get_expert_action()
+                    self.expert_buffer.insert(np.array(obs, copy=False),np.array(expert_action,copy=False))
+
+                if self.alpha_decay_policy_selector(ep_num):
+                    policy_action = self.train_env.get_expert_action()
+                else:
+                    policy_action = self.model( self.transforms(torch.from_numpy(obs).float().to(self.device).unsqueeze(0)) )
+                    policy_action = policy_action.squeeze().detach().cpu().numpy()
+                
+                
+
+                obs, state_obs, reward, done, info = self.train_env.step(policy_action)
                 ep_train_reward += reward
                 ep_length += ep_length
 
@@ -223,7 +255,10 @@ class Workspace:
                 'Train reward': train_reward,
                 'Eval reward': eval_reward
             })
-            wandb.log({"train_reward":train_reward, "eval_reward":eval_reward}, step= self.train_env.expert_calls)
+
+            if eval_reward > best_eval_reward:
+                best_eval_reward = eval_reward
+                wandb.log({"best_eval_reward":best_eval_reward, "expert_calls": self.train_env.expert_calls})
 
 
 @hydra.main(config_path='.', config_name='train')
@@ -232,7 +267,7 @@ def main(cfg):
     # as the cfg object. To access any of the parameters in the file,
     # access them like cfg.param, for example the learning rate would
     # be cfg.lr
-    wandb.init(project="deep-rl-hw1", name=f"Dagger-{cfg.run_name}")
+    wandb.init(project="deep-rl-hw1-final", name=f"Dagger-{cfg.run_name}")
     workspace = Workspace(cfg)
     workspace.run()
 

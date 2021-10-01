@@ -13,7 +13,7 @@ from hydra.utils import get_original_cwd, to_absolute_path
 
 
 class ReacherDaggerEnv(gym.Env):
-    def __init__(self, frame_height=60, frame_width=80, resize_visual=True):
+    def __init__(self, frame_height=120, frame_width=120, resize_visual=True):
         self._base_env = gym.make('ReacherPyBulletEnv-v0')
 
         self.expert_model = SAC.load(to_absolute_path('sac_reacher_expert_longer'), env=self._base_env)
@@ -40,7 +40,7 @@ class ReacherDaggerEnv(gym.Env):
         visual_obs = self._base_env.render(mode='rgb_array')
         if self._resize_visual:
             visual_obs = self._resize_image_obs(visual_obs)
-        return visual_obs
+        return visual_obs , self.prop_states
 
     def step(self, action):
         prop_obs, reward, done, info = self._base_env.step(action)
@@ -48,7 +48,7 @@ class ReacherDaggerEnv(gym.Env):
         visual_obs = self._base_env.render(mode='rgb_array')
         if self._resize_visual:
             visual_obs = self._resize_image_obs(visual_obs)
-        return visual_obs, reward, done, info
+        return visual_obs, self.prop_states, reward, done, info
 
     def get_expert_action(self):
         self.expert_calls += 1
@@ -68,3 +68,9 @@ class ReacherDaggerEnv(gym.Env):
         # Convert from B x H x W x C to B x C x H x W
         im = im.transpose((2, 0, 1))
         return im
+
+    def render(self,mode="rgb_array"):
+        if mode == "rgb_array":
+            return self._base_env.render(mode='rgb_array')
+        elif mode == "human":
+            return self._base_env.render(mode='human')
